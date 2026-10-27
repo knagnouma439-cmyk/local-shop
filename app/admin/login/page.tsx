@@ -128,7 +128,7 @@ export default function AdminLogin() {
         </div>
 
         <p className="mt-6 text-center text-xs text-neutral-600">
-          © {new Date().getFullYear()} LOCAL SHOP
+          © 2026 LOCAL SHOP
         </p>
       </section>
     </main>
