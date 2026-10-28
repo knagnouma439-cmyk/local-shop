@@ -1,4 +1,5 @@
-const NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+const RAW = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "").replace(/\D/g, "");
+const NUMBER = RAW.length === 9 ? `224${RAW}` : RAW;
 
 export default function WhatsAppButton({
   message = "Bonjour, j'ai une question.",
