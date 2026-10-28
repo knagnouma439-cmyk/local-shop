@@ -1,8 +1,93 @@
-
 import { Suspense } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
+
+const heroImage =
+  "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1800&q=85";
+
+const categoryImages: Record<string, string> = {
+  "t-shirt":
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85",
+
+  "t-shirts":
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85",
+
+  tshirt:
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85",
+
+  tshirts:
+    "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=85",
+
+  pantalons:
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800&q=85",
+
+  pantalon:
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800&q=85",
+
+  jeans:
+    "https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=800&q=85",
+
+  vestes:
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=85",
+
+  veste:
+    "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=800&q=85",
+
+  robes:
+    "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=800&q=85",
+
+  robe:
+    "https://images.unsplash.com/photo-1539008835657-9e8e9680c956?auto=format&fit=crop&w=800&q=85",
+
+  chaussures:
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85",
+
+  chaussure:
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85",
+
+  baskets:
+    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=85",
+
+  accessoires:
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=85",
+
+  sacs:
+    "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=85",
+
+  montres:
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=85",
+
+  sport:
+    "https://images.unsplash.com/photo-1538805060514-97d9cc17730c?auto=format&fit=crop&w=800&q=85",
+
+  sweats:
+    "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85",
+
+  "sweat-shirts":
+    "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=85",
+
+  chemises:
+    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=85",
+
+  chemise:
+    "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?auto=format&fit=crop&w=800&q=85",
+
+  mode_femme:
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=85",
+
+  mode_homme:
+    "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=800&q=85",
+};
+
+function normalizeSlug(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
 
 async function Categories() {
   const { data, error } = await supabase
@@ -27,21 +112,43 @@ async function Categories() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {data.map((category, index) => (
-        <Link
-          key={category.id}
-          href={`/catalogue?categorie=${category.slug}`}
-          className="group flex min-h-24 items-end justify-between border border-neutral-200 bg-white p-4 transition duration-300 hover:border-black hover:bg-black hover:text-white sm:min-h-28 sm:p-5"
-        >
-          <span className="text-base font-medium sm:text-lg">
-            {category.name}
-          </span>
-          <span className="text-sm text-neutral-400 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-white">
-            ↗
-          </span>
-        </Link>
-      ))}
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      {data.map((category) => {
+        const slug = normalizeSlug(category.slug || category.name);
+
+        const image =
+          categoryImages[slug] ||
+          "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=85";
+
+        return (
+          <Link
+            key={category.id}
+            href={`/catalogue?categorie=${encodeURIComponent(category.slug)}`}
+            className="group relative isolate flex h-52 items-end overflow-hidden bg-neutral-200 sm:h-64"
+          >
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-20 bg-cover bg-center transition duration-700 group-hover:scale-110"
+              style={{ backgroundImage: `url("${image}")` }}
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -z-10 bg-gradient-to-t from-black/80 via-black/15 to-transparent"
+            />
+
+            <div className="flex w-full items-end justify-between gap-2 p-4 text-white sm:p-5">
+              <span className="text-base font-semibold sm:text-lg">
+                {category.name}
+              </span>
+
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/70 transition duration-300 group-hover:bg-white group-hover:text-black">
+                ↗
+              </span>
+            </div>
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -57,18 +164,28 @@ async function LatestProducts() {
   if (error) {
     return (
       <p className="py-8 text-sm text-neutral-500">
-        Impossible de charger les articles pour le moment.
+        Impossible de charger les produits pour le moment.
       </p>
     );
   }
 
   if (!data?.length) {
     return (
-      <div className="border border-neutral-200 px-6 py-12 text-center">
-        <p className="text-lg font-medium">Votre prochaine pièce préférée.</p>
-        <p className="mt-2 text-sm text-neutral-500">
-          Les nouveaux articles apparaîtront ici dès leur ajout à la boutique.
+      <div className="border border-neutral-200 bg-white px-6 py-14 text-center">
+        <p className="text-xl font-semibold">
+          Nos prochaines nouveautés arrivent.
         </p>
+
+        <p className="mt-3 text-sm text-neutral-500">
+          Les produits ajoutés à la boutique apparaîtront ici.
+        </p>
+
+        <Link
+          href="/catalogue"
+          className="mt-6 inline-flex bg-emerald-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800"
+        >
+          Explorer la boutique
+        </Link>
       </div>
     );
   }
@@ -82,25 +199,27 @@ async function LatestProducts() {
   );
 }
 
-function SectionTitle({
-  eyebrow,
+function SectionHeading({
+  label,
   title,
   description,
 }: {
-  eyebrow: string;
+  label: string;
   title: string;
   description?: string;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-2 sm:mb-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
-        {eyebrow}
+    <div className="max-w-2xl">
+      <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-700">
+        {label}
       </p>
-      <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+
+      <h2 className="mt-3 text-3xl font-bold tracking-tight text-neutral-950 sm:text-4xl">
         {title}
       </h2>
+
       {description && (
-        <p className="max-w-xl text-sm leading-6 text-neutral-500 sm:text-base">
+        <p className="mt-3 max-w-xl text-sm leading-7 text-neutral-600 sm:text-base">
           {description}
         </p>
       )}
@@ -112,111 +231,80 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white text-neutral-950">
       {/* GRANDE BANNIÈRE */}
-      <section className="mx-auto max-w-[1440px] px-3 pt-3 sm:px-6 sm:pt-6">
-        <div className="relative isolate overflow-hidden bg-neutral-950 text-white">
+      <section className="mx-auto max-w-[1600px] px-3 pt-3 sm:px-6 sm:pt-6">
+        <div className="relative isolate min-h-[520px] overflow-hidden bg-neutral-900 sm:min-h-[600px]">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full border border-white/10 sm:h-96 sm:w-96"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -right-8 -top-8 h-56 w-56 rounded-full border border-white/10 sm:h-72 sm:w-72"
+            className="absolute inset-0 -z-20 bg-cover bg-center"
+            style={{ backgroundImage: `url("${heroImage}")` }}
           />
 
-          <div className="relative grid min-h-[430px] items-center gap-8 px-6 py-12 sm:px-10 sm:py-16 md:min-h-[500px] md:grid-cols-[1.15fr_0.85fr] md:px-14 lg:px-20 lg:py-20">
-            <div className="relative z-10 max-w-2xl">
-              <div className="mb-7 inline-flex items-center gap-3 border border-white/20 px-3 py-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                <span className="text-[10px] font-medium uppercase tracking-[0.24em] text-neutral-300 sm:text-xs">
-                  La mode, autrement
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 bg-gradient-to-r from-black/85 via-black/55 to-black/10"
+          />
+
+          <div className="flex min-h-[520px] items-center px-6 py-16 sm:min-h-[600px] sm:px-12 md:px-20 lg:px-24">
+            <div className="max-w-3xl text-white">
+              <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/30 bg-black/20 px-4 py-2 backdrop-blur-sm">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+
+                <span className="text-xs font-medium uppercase tracking-[0.2em]">
+                  Style · Qualité · Élégance
                 </span>
               </div>
 
-              <p className="mb-3 text-xs uppercase tracking-[0.25em] text-neutral-400 sm:text-sm">
+              <p className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-emerald-300 sm:text-base">
                 Nouvelle collection
               </p>
 
-              <h1 className="max-w-2xl text-4xl font-semibold leading-[1.06] tracking-[-0.045em] sm:text-6xl lg:text-7xl">
-                Le style qui
+              <h1 className="max-w-3xl text-4xl font-bold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
+                Découvre ton
                 <br />
-                vous ressemble<span className="text-neutral-500">.</span>
+                nouveau style.
               </h1>
 
-              <p className="mt-6 max-w-md text-sm leading-7 text-neutral-300 sm:text-base">
-                Découvrez une sélection de vêtements pensée pour affirmer
-                votre personnalité. Des pièces à choisir, des looks à créer,
-                votre style à vous.
+              <p className="mt-6 max-w-lg text-sm leading-7 text-neutral-200 sm:text-lg">
+                Des vêtements tendance pour affirmer ta personnalité.
+                Trouve les pièces qui te ressemblent et compose ton propre look.
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="mt-9 flex flex-wrap gap-3">
                 <Link
                   href="/catalogue"
-                  className="inline-flex min-h-12 items-center justify-center gap-4 bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200"
+                  className="inline-flex min-h-12 items-center justify-center gap-4 rounded-sm bg-emerald-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-emerald-500"
                 >
                   Découvrir la collection
-                  <span aria-hidden="true">↗</span>
+                  <span aria-hidden="true">→</span>
                 </Link>
 
                 <Link
                   href="/catalogue"
-                  className="inline-flex min-h-12 items-center justify-center border border-white/30 px-6 py-3 text-sm font-medium text-white transition hover:border-white hover:bg-white/10"
+                  className="inline-flex min-h-12 items-center justify-center border border-white/60 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white hover:text-black"
                 >
                   Explorer la boutique
                 </Link>
               </div>
 
-              <p className="mt-8 text-[10px] uppercase tracking-[0.2em] text-neutral-500">
-                Mode · Sélection · Style
-              </p>
-            </div>
-
-            {/* VISUEL ÉDITORIAL SANS PHOTO EXTERNE */}
-            <div className="relative hidden min-h-[330px] items-center justify-center md:flex lg:min-h-[370px]">
-              <div className="absolute right-4 top-2 h-[88%] w-[78%] border border-white/15" />
-              <div className="relative flex h-[310px] w-[78%] flex-col justify-between bg-neutral-900 p-6 lg:h-[350px] lg:p-8">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-neutral-400">
-                  Votre univers
-                </p>
-
-                <div>
-                  <p className="text-5xl font-semibold leading-none tracking-[-0.06em] lg:text-7xl">
-                    STYLE
-                  </p>
-                  <p className="mt-3 text-xs uppercase tracking-[0.25em] text-neutral-400">
-                    Sans compromis.
-                  </p>
-                </div>
-
-                <div className="flex items-end justify-between border-t border-white/15 pt-4">
-                  <span className="text-xs text-neutral-400">
-                    Trouvez votre signature
-                  </span>
-                  <span className="text-2xl">↗</span>
-                </div>
-              </div>
-
-              <div className="absolute bottom-5 left-0 border border-white/20 bg-neutral-950 px-4 py-3">
-                <p className="text-[10px] uppercase tracking-[0.18em] text-neutral-400">
-                  Votre prochain look
-                </p>
-                <p className="mt-1 text-sm font-medium">Commence ici.</p>
+              <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-xs text-neutral-300 sm:text-sm">
+                <span>✦ Style moderne</span>
+                <span>✦ Nouvelles collections</span>
+                <span>✦ Pour tous les goûts</span>
               </div>
             </div>
           </div>
 
-          <div className="relative grid grid-cols-3 border-t border-white/15">
+          <div className="absolute bottom-0 left-0 right-0 grid grid-cols-3 border-t border-white/20 bg-black/20 backdrop-blur-sm">
             {[
-              "Style affirmé",
-              "Sélection mode",
               "Nouveaux looks",
+              "Style affirmé",
+              "Collection tendance",
             ].map((item) => (
               <div
                 key={item}
-                className="border-r border-white/10 px-2 py-4 text-center last:border-r-0 sm:py-5"
+                className="px-2 py-4 text-center text-[10px] font-medium uppercase tracking-wider text-white sm:py-5 sm:text-xs"
               >
-                <span className="text-[9px] uppercase tracking-[0.12em] text-neutral-300 sm:text-xs sm:tracking-[0.18em]">
-                  {item}
-                </span>
+                {item}
               </div>
             ))}
           </div>
@@ -224,16 +312,25 @@ export default function Home() {
       </section>
 
       {/* CATÉGORIES */}
-      <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-20 lg:px-10">
-        <SectionTitle
-          eyebrow="Explorez notre univers"
-          title="Trouvez votre style."
-          description="Parcourez les catégories et découvrez les pièces qui vous correspondent."
-        />
+      <section className="mx-auto max-w-[1500px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
+        <div className="mb-8 flex items-end justify-between gap-4">
+          <SectionHeading
+            label="Explore notre univers"
+            title="Trouve ton style."
+            description="Des pièces sélectionnées pour créer des looks qui te ressemblent."
+          />
+
+          <Link
+            href="/catalogue"
+            className="hidden shrink-0 items-center gap-2 text-sm font-semibold text-emerald-800 transition hover:gap-3 sm:inline-flex"
+          >
+            Tout voir →
+          </Link>
+        </div>
 
         <Suspense
           fallback={
-            <p className="py-6 text-sm text-neutral-500">
+            <p className="py-8 text-sm text-neutral-500">
               Chargement des catégories…
             </p>
           }
@@ -242,21 +339,21 @@ export default function Home() {
         </Suspense>
       </section>
 
-      {/* DERNIERS ARTICLES */}
+      {/* NOUVEAUTÉS */}
       <section className="border-y border-neutral-200 bg-neutral-50">
-        <div className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-20 lg:px-10">
-          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <SectionTitle
-              eyebrow="À découvrir"
-              title="Les dernières pièces."
-              description="Les nouveautés de la boutique, réunies au même endroit."
+        <div className="mx-auto max-w-[1500px] px-4 py-16 sm:px-6 sm:py-20 lg:px-10">
+          <div className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <SectionHeading
+              label="Fraîchement arrivés"
+              title="Les nouveautés."
+              description="Découvre les dernières pièces ajoutées à notre collection."
             />
 
             <Link
               href="/catalogue"
-              className="mb-6 inline-flex w-fit items-center gap-3 border-b border-black pb-2 text-sm font-semibold transition hover:gap-5 sm:mb-8"
+              className="inline-flex w-fit items-center gap-3 border-b border-emerald-700 pb-2 text-sm font-semibold text-emerald-800 transition hover:gap-5"
             >
-              Voir tout le catalogue
+              Voir tous les produits
               <span aria-hidden="true">→</span>
             </Link>
           </div>
@@ -264,7 +361,7 @@ export default function Home() {
           <Suspense
             fallback={
               <p className="py-8 text-sm text-neutral-500">
-                Chargement des articles…
+                Chargement des produits…
               </p>
             }
           >
@@ -273,36 +370,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SIGNATURE DE MARQUE */}
-      <section className="mx-auto max-w-[1440px] px-4 py-14 sm:px-6 sm:py-20 lg:px-10">
-        <div className="flex flex-col justify-between gap-8 border-b border-neutral-200 pb-10 md:flex-row md:items-end">
+      {/* BANNIÈRE DE MARQUE */}
+      <section className="mx-auto max-w-[1500px] px-4 py-16 sm:px-6 sm:py-24 lg:px-10">
+        <div className="relative isolate overflow-hidden bg-emerald-950 px-6 py-12 text-white sm:px-12 sm:py-16 lg:px-20">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 bg-cover bg-center opacity-20"
+            style={{
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80")',
+            }}
+          />
+
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-500">
-              Votre style, vos choix
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
+              LOCAL SHOP
             </p>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              La bonne pièce.
-              <br />
-              La bonne attitude.
+
+            <h2 className="mt-4 text-3xl font-bold leading-tight sm:text-5xl">
+              La mode, c’est aussi une façon de s’exprimer.
             </h2>
+
+            <p className="mt-5 max-w-xl text-sm leading-7 text-neutral-200 sm:text-base">
+              Explore nos collections, découvre tes prochains coups de cœur
+              et crée un style qui ne ressemble qu’à toi.
+            </p>
+
+            <Link
+              href="/catalogue"
+              className="mt-8 inline-flex min-h-12 items-center gap-4 bg-white px-6 py-3 text-sm font-bold text-emerald-950 transition hover:bg-emerald-100"
+            >
+              Trouver mon prochain look
+              <span aria-hidden="true">→</span>
+            </Link>
           </div>
-
-          <Link
-            href="/catalogue"
-            className="inline-flex min-h-12 w-fit items-center gap-4 bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800"
-          >
-            Entrer dans la boutique
-            <span aria-hidden="true">↗</span>
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-2 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs font-medium uppercase tracking-[0.18em]">
-            Votre boutique de mode
-          </p>
-          <p className="text-xs text-neutral-500">
-            Une sélection à découvrir, un style à composer.
-          </p>
         </div>
       </section>
     </main>

@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -55,6 +56,13 @@ export default function AdminLayout({
             className="shrink-0 border-b-2 border-transparent px-5 py-4 text-sm font-semibold text-neutral-600 transition hover:border-neutral-950 hover:text-neutral-950"
           >
             Produits
+          </Link>
+
+          <Link
+            href="/admin/statistiques"
+            className="shrink-0 border-b-2 border-transparent px-5 py-4 text-sm font-semibold text-neutral-600 transition hover:border-neutral-950 hover:text-neutral-950"
+          >
+            Statistiques
           </Link>
         </div>
       </nav>

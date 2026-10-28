@@ -1,10 +1,11 @@
-
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/supabase-ssr";
 import { supabaseAdmin } from "@/lib/supabase-server";
 import AddProductForm from "@/components/AddProductForm";
-import { updateProduct } from "./actions";
+import EditProductForm from "@/components/EditProductForm";
+import DeleteProductButton from "@/components/DeleteProductButton";
+import { updateProduct, deleteProduct } from "./actions";
 
 async function Products() {
   if (!(await requireAdmin())) redirect("/admin/login");
@@ -15,7 +16,9 @@ async function Products() {
     admin.from("categories").select("id, name").order("id"),
     admin
       .from("products")
-      .select("id, name, price_gnf, stock, active, image_url")
+      .select(
+        "id, name, description, category_id, price_gnf, stock, active, image_url, sizes, colors"
+      )
       .order("id", { ascending: false }),
   ]);
 
@@ -28,8 +31,12 @@ async function Products() {
   }
 
   const articles = products ?? [];
+  const categoryList = categories ?? [];
   const visibleCount = articles.filter((p) => p.active).length;
-  const stockCount = articles.reduce((total, p) => total + (Number(p.stock) || 0), 0);
+  const stockCount = articles.reduce(
+    (total, p) => total + (Number(p.stock) || 0),
+    0
+  );
 
   return (
     <div className="space-y-8">
@@ -58,16 +65,13 @@ async function Products() {
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
             Catalogue
           </p>
-          <h2 className="mt-1 text-xl font-bold text-neutral-900">
-            Ajouter un article
-          </h2>
+          <h2 className="mt-1 text-xl font-bold text-neutral-900">Ajouter un article</h2>
           <p className="mt-1 text-sm text-neutral-500">
             Renseigne les informations et la photo de ton produit.
           </p>
         </div>
-
         <div className="p-5 sm:p-6">
-          <AddProductForm categories={categories ?? []} />
+          <AddProductForm categories={categoryList} />
         </div>
       </section>
 
@@ -77,14 +81,11 @@ async function Products() {
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
               Gestion du catalogue
             </p>
-            <h2 className="mt-1 text-xl font-bold text-neutral-900">
-              Mes articles
-            </h2>
+            <h2 className="mt-1 text-xl font-bold text-neutral-900">Mes articles</h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Modifie les prix, les stocks et la visibilité de tes produits.
+              Modifie toutes les informations de tes produits.
             </p>
           </div>
-
           <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-sm font-semibold text-neutral-600">
             {articles.length} article{articles.length !== 1 ? "s" : ""}
           </span>
@@ -95,29 +96,23 @@ async function Products() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100 text-2xl">
               ◇
             </div>
-            <h3 className="mt-4 font-semibold text-neutral-900">
-              Aucun article pour le moment
-            </h3>
+            <h3 className="mt-4 font-semibold text-neutral-900">Aucun article pour le moment</h3>
             <p className="mt-1 text-sm text-neutral-500">
               Ajoute ton premier produit avec le formulaire ci-dessus.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
             {articles.map((p) => (
               <article
                 key={p.id}
                 className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:shadow-md"
               >
                 <div className="flex gap-4 p-4 sm:p-5">
-                  <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl bg-neutral-100 sm:h-28 sm:w-24">
+                  <div className="h-28 w-24 shrink-0 overflow-hidden rounded-xl bg-neutral-100">
                     {p.image_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.image_url}
-                        alt={p.name}
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={p.image_url} alt={p.name} className="h-full w-full object-cover" />
                     ) : (
                       <div className="flex h-full items-center justify-center text-2xl text-neutral-300">
                         ◇
@@ -127,10 +122,7 @@ async function Products() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-start justify-between gap-2">
-                      <h3 className="break-words font-bold text-neutral-900">
-                        {p.name}
-                      </h3>
-
+                      <h3 className="break-words font-bold text-neutral-900">{p.name}</h3>
                       <span
                         className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                           p.active
@@ -141,79 +133,44 @@ async function Products() {
                         {p.active ? "Visible" : "Masqué"}
                       </span>
                     </div>
-
                     <p className="mt-2 text-lg font-black text-neutral-900">
                       {Number(p.price_gnf || 0).toLocaleString("fr-FR")} GNF
                     </p>
-
                     <p className="mt-1 text-sm text-neutral-500">
-                      Stock :{" "}
-                      <span
-                        className={
-                          Number(p.stock) > 0
-                            ? "font-semibold text-neutral-700"
-                            : "font-semibold text-red-600"
-                        }
-                      >
-                        {p.stock ?? 0} unité(s)
-                      </span>
+                      Stock : <span className="font-semibold text-neutral-700">{p.stock ?? 0} unité(s)</span>
+                    </p>
+                    <p className="mt-1 text-sm text-neutral-500">
+                      Catégorie : {categoryList.find((c) => c.id === p.category_id)?.name ?? "Non définie"}
                     </p>
                   </div>
                 </div>
 
-                <form
-                  action={updateProduct}
-                  className="space-y-4 border-t border-neutral-100 bg-neutral-50/70 p-4 sm:p-5"
-                >
-                  <input type="hidden" name="id" value={p.id} />
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <label className="block text-sm font-medium text-neutral-600">
-                      Prix de vente (GNF)
-                      <input
-                        name="price"
-                        type="number"
-                        min={0}
-                        step={1}
-                        required
-                        defaultValue={p.price_gnf}
-                        className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-neutral-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                <div className="border-t border-neutral-100 p-4 sm:p-5">
+                  <details className="group">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3 font-semibold text-neutral-800 transition hover:border-emerald-500 hover:text-emerald-700">
+                      <span>✏️ Modifier ce produit</span>
+                      <span className="transition group-open:rotate-180">▾</span>
+                    </summary>
+                    <div className="pt-4">
+                      <EditProductForm
+                        product={{
+                          ...p,
+                          description: p.description ?? "",
+                          sizes: p.sizes ?? [],
+                          colors: p.colors ?? [],
+                          image_url: p.image_url ?? "",
+                        }}
+                        categories={categoryList}
+                        updateAction={updateProduct}
                       />
-                    </label>
+                    </div>
+                  </details>
 
-                    <label className="block text-sm font-medium text-neutral-600">
-                      Quantité en stock
-                      <input
-                        name="stock"
-                        type="number"
-                        min={0}
-                        step={1}
-                        required
-                        defaultValue={p.stock ?? 0}
-                        className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-neutral-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                      />
-                    </label>
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <label className="flex cursor-pointer items-center gap-2 text-sm font-medium text-neutral-700">
-                      <input
-                        name="active"
-                        type="checkbox"
-                        defaultChecked={p.active}
-                        className="h-4 w-4 accent-emerald-600"
-                      />
-                      Afficher dans la boutique
-                    </label>
-
-                    <button
-                      type="submit"
-                      className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
-                    >
-                      Enregistrer les modifications
-                    </button>
-                  </div>
-                </form>
+                  <form action={deleteProduct} className="mt-3">
+                    <input type="hidden" name="id" value={p.id} />
+                    <DeleteProductButton name={p.name} />
+                  </form>
+                </div>
               </article>
             ))}
           </div>

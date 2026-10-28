@@ -640,6 +640,12 @@ async function Dashboard({
 >
   <span>▣</span> Produits
 </a>
+<a
+  href="/admin/statistiques"
+  className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-400 transition hover:bg-white/10 hover:text-white"
+>
+  <span>▥</span> Statistiques
+</a>
           <a
             href="/admin"
             className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-neutral-400 transition hover:bg-white/10 hover:text-white"
